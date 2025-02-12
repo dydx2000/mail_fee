@@ -17,7 +17,7 @@ data = {"categoryList":[],"country":"US","high":"","length":"","weight":500,"wid
 
 response = requests.post(url=url_oopbuy, json=data,headers=headers)
 
-print(response.status_code)
+# print(response.status_code)
 # print(response.json())
 
 fee_datas = response.json()
@@ -59,9 +59,6 @@ for fee in fee_datas['result']:
     end_date = fee["maxDeliveredDays"]
     duration = str(start_date)+"-"+str(end_date)
 
-
-
-
     # if fee['available']:
     # print(fee)
     my_feedata["网站"]['venders'].append([
@@ -82,6 +79,9 @@ for fee in fee_datas['result']:
     # print(i)
     # i+=1
     # print(my_feedata)
+
+
+
 
 # print(my_feedata)
 for item in my_feedata['网站']['venders']:

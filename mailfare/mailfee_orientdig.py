@@ -1,7 +1,4 @@
-from lib2to3.fixes.fix_dict import iter_exempt
-from operator import itemgetter
-
-import requests, json
+import requests
 
 url_orientdig = "https://orientdig.com/wp-admin/admin-ajax.php?action=get_estimation_query_prices"
 
@@ -32,25 +29,25 @@ data = {
 
 response = requests.post(url=url_orientdig, data=data)
 
-print(response.request.headers)
+# print(response.request.headers)
 # response = requests.post(url=url_orientdig, data=data, headers=headers)
 
 # response = requests.post(url=url_mule, data=data, params=params_mule)
 
-print(response.status_code)
-print(response.json())
+# print(response.status_code)
+# print(response.json())
 
 fee_datas = response.json()
 
-print(fee_datas)
+# print(fee_datas)
 my_feedata = {}
 my_feedata["国家"] = "美国"
 my_feedata["重量"] = "501g"
 my_feedata["网站"] = {"siteName": "mulebuy", "venders": []}
 
 for fee in fee_datas['data']:
-    print(fee)
-    print(fee['available'])
+    # print(fee)
+    # print(fee['available'])
     if fee['available']:
         # print(fee)
         my_feedata["网站"]['venders'].append([
@@ -68,6 +65,6 @@ for fee in fee_datas['data']:
 
         ])
 
-print(my_feedata)
+# print(my_feedata)
 for item in my_feedata['网站']['venders']:
     print(item)

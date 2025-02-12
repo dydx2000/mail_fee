@@ -38,12 +38,12 @@ data = {
 # response = requests.post(url=url_mule, data=data,headers=headers, params=params_mule)
 response = requests.post(url=url_mule, data=data, params=params_mule)
 
-print(response.status_code)
-print(response.json())
+# print(response.status_code)
+# print(response.json())
 
 fee_datas = response.json()
 
-print(fee_datas)
+# print(fee_datas)
 my_feedata = {}
 my_feedata["国家"] = "美国"
 my_feedata["重量"] = "501g"
@@ -67,6 +67,6 @@ for fee in fee_datas['data']:
 
         ])
 
-print(my_feedata)
+# print(my_feedata)
 for item in my_feedata['网站']['venders']:
     print(item)
