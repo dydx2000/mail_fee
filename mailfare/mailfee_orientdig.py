@@ -29,7 +29,10 @@ data = {
 
 }
 
+
 response = requests.post(url=url_orientdig, data=data)
+
+print(response.request.headers)
 # response = requests.post(url=url_orientdig, data=data, headers=headers)
 
 # response = requests.post(url=url_mule, data=data, params=params_mule)
