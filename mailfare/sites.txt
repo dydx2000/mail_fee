@@ -3,6 +3,6 @@ https://hippoobuy.com/zh/estimation/      almost done
 https://acbuy.com/estimation?params=weight%253D500   @   done
 https://orientdig.com/estimation    @    done
 https://oopbuy.com/zh/estimation    @    done
-https://joyabuy.com/zh/estimation/    @
-https://cnfans.com/zh/my-account/warehouse/   @
+https://joyabuy.com/zh/estimation/    @   done
+https://cnfans.com/zh/my-account/warehouse/   @ done
 https://hoobuy.com/estimation       nonce hearder

@@ -34,6 +34,7 @@ multipart_data = (
 
 # 目标 URL
 url_cfans = "https://cnfans.com/wp-admin/admin-ajax.php?action=get_estimation_query_prices"
+# url_cfans = "https://cnfans.com/wp-admin/admin-ajax.php"
 
 params = {
     "action": "get_estimation_query_prices"
