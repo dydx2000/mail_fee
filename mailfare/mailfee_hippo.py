@@ -27,7 +27,7 @@ headers = {
     "Accept-Language": "zh-CN,zh;q=0.9"
 }
 
-data = {"warehouse_id":1250,"country_id":12072,"area_id":"","sub_area_id":"","weight":5000,"length":"","width":"","height":"","prop_ids":[],"postcode":""}
+data = {"warehouse_id":1250,"country_id":11987,"area_id":"","sub_area_id":"","weight":500*1000,"length":"","width":"","height":"","prop_ids":[],"postcode":""}
 
 response = requests.post(url=url_hippo,  headers=headers, json=data, verify=False)
 
@@ -41,12 +41,12 @@ fee_datas = response.json()
 my_feedata = {}
 my_feedata["国家"] = "美国"
 my_feedata["重量"] = "501g"
-my_feedata["网站"] = {"siteName": "mulebuy", "venders": []}
+my_feedata["网站"] = {"siteName": "hippobuy", "venders": []}
 
 
 for fee in fee_datas['data']:
-    my_feedata["网站"]['venders'].append([
-        {"venderName": fee['name']},
+    my_feedata["网站"]['venders'].append(
+        # {"venderName": fee['name']},
         # {'总价': fee['feeDetail']['total']},
         # {'首重价格': fee['first_money']},
         # {"额外重量价格": fee['feeDetail']["feeContinue"]},
@@ -57,8 +57,21 @@ for fee in fee_datas['data']:
         # {"尺寸限制": fee['restrictions']["dimensionRestriction"]},
         # {"体积重量计费规则": fee['restrictions']["volumeWeightRule"]},
         # {"运输时间": fee["reference_time"]}
-        ])
-    print(fee)
 
+        {"venderName": fee['cn_name'],
+         '总价': fee['count_first']/100,
+         '首重价格': fee['first_money']/100,
+         "额外重量价格": None,
+         "操作费": None,
+         "服务费": None,
+         "最低重量限制": fee['min_weight']/100,
+         "最高重量限制": fee['max_weight']/100,
+         "尺寸限制": None,
+         "体积重量计费规则": fee['remark'],
+         "运输时间": fee["reference_time"]},
+        )
+    # print(fee)
+
+print(my_feedata["网站"]['venders'])
 
 

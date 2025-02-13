@@ -1,12 +1,19 @@
 # 导入库
-import requests, httpx, uuid, json
+import time
+
+import requests
+import httpx
+import uuid
+import json
+import tls_client
 from openpyxl import Workbook
+
 
 # 公共变量 my_feedata 存储全部获取的邮费信息
 from openpyxl.styles import Alignment, Font
 
-country = "US"
-weight = 600
+country = input("请输入国家代码: ")
+weight = int(input("请输入包裹重量(克): "))
 
 my_feedata = {}
 my_feedata["国家"] = country
@@ -411,9 +418,205 @@ for item in curSiteInfo['venders']:
 my_feedata['网站'].append(curSiteInfo)
 print("acbuy 查询完毕")
 
-print(sheetData)
+# 6, cnfans
 
-from openpyxl import Workbook
+# 创建会话，模拟 Chrome
+session = tls_client.Session(
+    client_identifier="chrome_133",  # 伪装 Chrome 120
+    random_tls_extension_order=True  # 让 TLS 扩展字段顺序随机化
+)
+
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+}
+
+# 目标 URL
+url_cfans = "https://cnfans.com/wp-admin/admin-ajax.php?action=get_estimation_query_prices"
+
+# boundary = f"----WebKitFormBoundary{uuid.uuid4().hex[:16]}"
+boundary = f"----WebKitFormBoundary{uuid.uuid4().hex}"
+multipart_data = (
+    f"--{boundary}\r\n"
+    f'Content-Disposition: form-data; name="destination"\r\n\r\n'
+    f"{country}\r\n"
+    f"--{boundary}\r\n"
+    f'Content-Disposition: form-data; name="weight"\r\n\r\n'
+    f"{weight}\r\n"
+    f"--{boundary}\r\n"
+    f'Content-Disposition: form-data; name="features"\r\n\r\n'
+    f"\r\n"
+    f"--{boundary}\r\n"
+    f'Content-Disposition: form-data; name="length"\r\n\r\n'
+    f"\r\n"
+    f"--{boundary}\r\n"
+    f'Content-Disposition: form-data; name="width"\r\n\r\n'
+    f"\r\n"
+    f"--{boundary}\r\n"
+    f'Content-Disposition: form-data; name="height"\r\n\r\n'
+    f"\r\n"
+    f"--{boundary}\r\n"
+    f'Content-Disposition: form-data; name="username"\r\n\r\n'
+    f"\r\n"
+    f"--{boundary}\r\n"
+    f'Content-Disposition: form-data; name="password"\r\n\r\n'
+    f"\r\n"
+    f"--{boundary}\r\n"
+    f'Content-Disposition: form-data; name="terms"\r\n\r\n'
+    f"1\r\n"
+    f"--{boundary}--\r\n"
+)
+
+headers_cfans = {
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
+    "sec-ch-ua": '"Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133")',
+    "Content-Type": f"multipart/form-data; boundary={boundary}",
+    "accept": "*/*",
+    "origin": "https://cnfans.com",
+    "referer": "https://cnfans.com/zh/estimation/",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,ja-JP;q=0.6,ja;q=0.5",
+}
+
+response = session.post(url_cfans, headers=headers_cfans, data=multipart_data.encode())
+
+fee_datas = response.json()
+
+curSiteInfo = {"siteName": "cnfans", "venders": []}
+
+for fee in fee_datas['data']:
+    if fee['available']:
+        curSiteInfo['venders'].append(
+            {"venderName": fee['name'],
+             '总价': fee['feeDetail']['total'],
+             '首重价格': fee['feeDetail']['feeFirst'],
+             "额外重量价格": fee['feeDetail']["feeContinue"],
+             "操作费": fee['feeDetail']["operationFee"],
+             "服务费": fee['feeDetail']["serviceFee"],
+             "最低重量限制": fee['restrictions']["minWeight"],
+             "最高重量限制": fee['restrictions']["maxWeight"],
+             "尺寸限制": fee['restrictions']["dimensionRestriction"],
+             "体积重量计费规则": fee['restrictions']["volumeWeightRule"],
+             "运输时间": fee["transitTime"]},
+        )
+
+# 打印所以有邮费信息
+
+for item in curSiteInfo['venders']:
+    print(item)
+    sheetData.append(
+        (country,
+         weight,
+         curSiteInfo['siteName'],
+         item['venderName'],
+         item['总价'],
+         item['首重价格'],
+         item['额外重量价格'],
+         item['操作费'],
+         item['服务费'],
+         item['最低重量限制'],
+         item['最高重量限制'],
+         item['尺寸限制'],
+         item['体积重量计费规则'],
+         item['运输时间'],
+         )
+    )
+
+my_feedata['网站'].append(curSiteInfo)
+print("cnfans 查询完毕")
+
+# 7 hippobuy
+
+country_hippo = {'US': 11987, 'PH': 13410, 'QA': 13411, 'MV': 13412, 'NP': 13413, 'LK': 13414, 'TR': 13415, 'BN': 13416,
+                 'IL': 13417, 'ID': 13418, 'AL': 13419, 'EE': 13420, 'AD': 13421, 'AT': 13422, 'BG': 13423, 'BE': 13424,
+                 'IS': 13425, 'RU': 13426, 'FI': 13427, 'HR': 13428, 'LU': 13429, 'RO': 13430, 'MC': 13431, 'SI': 13432,
+                 'UA': 13433, 'GR': 13434, 'MX': 13435, 'JM': 13436, 'GB': 12072, 'CA': 12311, 'AU': 12303, 'NZ': 13401,
+                 'DK': 13405, 'SE': 13403, 'NO': 13407, 'IE': 13404, 'CH': 13408, 'SA': 13409, 'NL': 13406, 'FR': 12071,
+                 'DE': 12070, 'ES': 12327, 'IT': 13397, 'PT': 13396, 'KY': 13399, 'SK': 13398, 'CL': 13394, 'PL': 12069,
+                 'SG': 12306, 'JP': 12305, 'MY': 13402, 'KR': 12304, 'CN': 13395}
+
+url_hippo = "https://api-jiyun-v3.haiouoms.com/api/client/express/price-query"
+headers = {
+    "Host": "api-jiyun-v3.haiouoms.com",
+    "Connection": "keep-alive",
+    "Content-Length": "150",
+    "language": "zh_CN",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "Authorization": "None",
+    "sec-ch-ua": "\"Not(A:Brand\";v=\"99\", \"Google Chrome\";v=\"133\", \"Chromium\";v=\"133\"",
+    "currency": "USD",
+    "sec-ch-ua-mobile": "?0",
+    "App-key": "arIM1n8tmcrHgD1jHz0Zt8H1XPxUjVen",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
+    "Accept": "application/json, text/plain, */*",
+    "Content-Type": "application/json;charset=UTF-8",
+    "X-Uuid": "dd70dbad-9df5-4813-b17d-910a60dd54ef",
+    "Origin": "https://hippoobuy.com",
+    "Sec-Fetch-Site": "cross-site",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
+    "Referer": "https://hippoobuy.com/",
+    "Accept-Encoding": "gzip, deflate, br, zstd",
+    "Accept-Language": "zh-CN,zh;q=0.9"
+}
+data = {"warehouse_id": 1250, "country_id": country_hippo[country], "area_id": "", "sub_area_id": "", "weight": weight * 1000,
+        "length": "", "width": "", "height": "", "prop_ids": [], "postcode": ""}
+
+response = requests.post(url=url_hippo, headers=headers, json=data, verify=False)
+
+fee_datas = response.json()
+
+curSiteInfo = {"siteName": "hippobuy", "venders": []}
+
+for fee in fee_datas['data']:
+    curSiteInfo['venders'].append(
+        # {"venderName": fee['name']},
+        # {'总价': fee['feeDetail']['total']},
+        # {'首重价格': fee['first_money']},
+        # {"额外重量价格": fee['feeDetail']["feeContinue"]},
+        # {"操作费": fee['feeDetail']["operationFee"]},
+        # {"服务费": fee['feeDetail']["serviceFee"]},
+        # {"最低重量限制": fee['min_weight']},
+        # {"最高重量限制": fee['max_weight'],
+        # {"尺寸限制": fee['restrictions']["dimensionRestriction"]},
+        # {"体积重量计费规则": fee['restrictions']["volumeWeightRule"]},
+        # {"运输时间": fee["reference_time"]}
+
+        {"venderName": fee['cn_name'],
+         '总价': fee['count_first'] / 100,
+         '首重价格': fee['first_money'] / 100,
+         "额外重量价格": None,
+         "操作费": None,
+         "服务费": None,
+         "最低重量限制": fee['min_weight'] / 1000,
+         "最高重量限制": fee['max_weight'] / 1000,
+         "尺寸限制": None,
+         "体积重量计费规则": fee['remark'],
+         "运输时间": fee["reference_time"]},
+    )
+    # print(fee)
+for item in curSiteInfo['venders']:
+    print(item)
+    sheetData.append(
+        (country,
+         weight,
+         curSiteInfo['siteName'],
+         item['venderName'],
+         item['总价'],
+         item['首重价格'],
+         item['额外重量价格'],
+         item['操作费'],
+         item['服务费'],
+         item['最低重量限制'],
+         item['最高重量限制'],
+         item['尺寸限制'],
+         item['体积重量计费规则'],
+         item['运输时间'],
+         )
+    )
+my_feedata['网站'].append(curSiteInfo)
+print("hippobuy 查询完毕")
+
+print(sheetData)
 
 # 创建一个新的工作簿
 wb = Workbook()
@@ -448,7 +651,7 @@ for row in sheetData:
 
 max_rows = ws.max_row  # 获取最大行
 max_columns = ws.max_column
-align=Alignment(horizontal='center',vertical='center')
+align = Alignment(horizontal='center', vertical='center')
 ws.column_dimensions['C'].width = 15
 ws.column_dimensions['D'].width = 35
 ws.column_dimensions['G'].width = 15
@@ -459,7 +662,7 @@ ws.column_dimensions['M'].width = 24
 
 for i in range(1, max_rows + 1):
     for j in range(1, max_columns + 1):
-        if i>1 and (j==4 or j==12 or j==13):
+        if i > 1 and (j == 4 or j == 12 or j == 13):
             continue
         ws.cell(i, j).alignment = align
 
@@ -467,11 +670,17 @@ for i in range(1, max_rows + 1):
 bold_font = Font(bold=True)
 # 将粗体字体样式应用到 B1 单元格
 
-for i in range(1,max_rows+1):
-    ws.cell(1,i).font=bold_font
+for i in range(1, max_rows + 1):
+    ws.cell(1, i).font = bold_font
 
 # for j in range(1,max_columns+1):
 #     ws.column_dimensions[j].width = 15
 
 # 保存工作簿
-wb.save('mailFee.xlsx')
+# 将时间戳转换为本地时间元组
+timestamp=time.time()
+local_time = time.localtime(timestamp)
+
+# 格式化为文本
+formatted_time = time.strftime("%Y-%m-%d_%H%M%S", local_time)
+wb.save(f'mailFee_{formatted_time}.xlsx')
