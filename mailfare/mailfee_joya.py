@@ -1,4 +1,5 @@
 import httpx, uuid
+import requests
 
 boundary = f"----WebKitFormBoundary{uuid.uuid4().hex[:16]}"
 multipart_data = (
@@ -102,12 +103,13 @@ headers_joya = {
     # "Cookie": "wmc_current_currency=USD; wmc_current_currency_old=USD; pll_language=en; _ss_s_uid=9eb6242c0bcb35c9de9555eb2b9c731b; _ga=GA1.1.1778277922.1739259791; __ukey=81sml3atx5; PHPSESSID=jmfohumqqujm5v4qkfvpqcreqo; _ga_LLNZ3BEEWR=GS1.1.1739324439.5.0.1739324439.0.0.0"
 }
 
-with httpx.Client(http2=True) as client:
-    client.headers.update(headers_joya)
-    response = client.post(url=url_joya, content=multipart_data.encode())
-    request = response.request
+# with httpx.Client(http2=True) as client:
+#     client.headers.update(headers_joya)
+#     response = client.post(url=url_joya, content=multipart_data.encode())
+#     request = response.request
 
     # print("request body:", request.content.decode())
+response = requests.post(url=url_joya, data=multipart_data.encode(), headers=headers_joya)
 
 # print(response.status_code)
 # print(response.text)
