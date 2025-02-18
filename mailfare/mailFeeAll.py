@@ -490,6 +490,14 @@ E_ZONE = {
     "TR": "土耳其"
 }
 
+country_hippo = {'US': 11987, 'PH': 13410, 'QA': 13411, 'MV': 13412, 'NP': 13413, 'LK': 13414, 'TR': 13415, 'BN': 13416,
+                     'IL': 13417, 'ID': 13418, 'AL': 13419, 'EE': 13420, 'AD': 13421, 'AT': 13422, 'BG': 13423, 'BE': 13424,
+                     'IS': 13425, 'RU': 13426, 'FI': 13427, 'HR': 13428, 'LU': 13429, 'RO': 13430, 'MC': 13431, 'SI': 13432,
+                     'UA': 13433, 'GR': 13434, 'MX': 13435, 'JM': 13436, 'GB': 12072, 'CA': 12311, 'AU': 12303, 'NZ': 13401,
+                     'DK': 13405, 'SE': 13403, 'NO': 13407, 'IE': 13404, 'CH': 13408, 'SA': 13409, 'NL': 13406, 'FR': 12071,
+                     'DE': 12070, 'ES': 12327, 'IT': 13397, 'PT': 13396, 'KY': 13399, 'SK': 13398, 'CL': 13394, 'PL': 12069,
+                     'SG': 12306, 'JP': 12305, 'MY': 13402, 'KR': 12304, 'CN': 13395}
+
 # glb = dict(globals)
 # print(type(glb))
 # glblist = list(glb.values())
@@ -1187,13 +1195,7 @@ def countryFee(country, weight):
 
     # 7 hippobuy
 
-    country_hippo = {'US': 11987, 'PH': 13410, 'QA': 13411, 'MV': 13412, 'NP': 13413, 'LK': 13414, 'TR': 13415, 'BN': 13416,
-                     'IL': 13417, 'ID': 13418, 'AL': 13419, 'EE': 13420, 'AD': 13421, 'AT': 13422, 'BG': 13423, 'BE': 13424,
-                     'IS': 13425, 'RU': 13426, 'FI': 13427, 'HR': 13428, 'LU': 13429, 'RO': 13430, 'MC': 13431, 'SI': 13432,
-                     'UA': 13433, 'GR': 13434, 'MX': 13435, 'JM': 13436, 'GB': 12072, 'CA': 12311, 'AU': 12303, 'NZ': 13401,
-                     'DK': 13405, 'SE': 13403, 'NO': 13407, 'IE': 13404, 'CH': 13408, 'SA': 13409, 'NL': 13406, 'FR': 12071,
-                     'DE': 12070, 'ES': 12327, 'IT': 13397, 'PT': 13396, 'KY': 13399, 'SK': 13398, 'CL': 13394, 'PL': 12069,
-                     'SG': 12306, 'JP': 12305, 'MY': 13402, 'KR': 12304, 'CN': 13395}
+
 
     url_hippo = "https://api-jiyun-v3.haiouoms.com/api/client/express/price-query"
     headers = {
@@ -1219,69 +1221,71 @@ def countryFee(country, weight):
         "Accept-Encoding": "gzip, deflate, br, zstd",
         "Accept-Language": "zh-CN,zh;q=0.9"
     }
-    data = {"warehouse_id": 1250, "country_id": country_hippo[country], "area_id": "", "sub_area_id": "", "weight": weight * 1000,
-            "length": "", "width": "", "height": "", "prop_ids": [], "postcode": ""}
 
-    try:
+    if country in country_hippo.keys():
+        data = {"warehouse_id": 1250, "country_id": country_hippo[country], "area_id": "", "sub_area_id": "", "weight": weight * 1000,
+                "length": "", "width": "", "height": "", "prop_ids": [], "postcode": ""}
 
-        response = requests.post(url=url_hippo, headers=headers, json=data, verify=False)
-        fee_datas = response.json()
-        curSiteInfo = {"siteName": "hippobuy", "venders": []}
+        try:
 
-        for fee in fee_datas['data']:
-            curSiteInfo['venders'].append(
-                # {"venderName": fee['name']},
-                # {'总价': fee['feeDetail']['total']},
-                # {'首重价格': fee['first_money']},
-                # {"额外重量价格": fee['feeDetail']["feeContinue"]},
-                # {"操作费": fee['feeDetail']["operationFee"]},
-                # {"服务费": fee['feeDetail']["serviceFee"]},
-                # {"最低重量限制": fee['min_weight']},
-                # {"最高重量限制": fee['max_weight'],
-                # {"尺寸限制": fee['restrictions']["dimensionRestriction"]},
-                # {"体积重量计费规则": fee['restrictions']["volumeWeightRule"]},
-                # {"运输时间": fee["reference_time"]}
+            response = requests.post(url=url_hippo, headers=headers, json=data, verify=False)
+            fee_datas = response.json()
+            curSiteInfo = {"siteName": "hippobuy", "venders": []}
 
-                {"venderName": fee['cn_name'],
-                 '总价': fee['count_first'] / 100,
-                 '首重价格': fee['first_money'] / 100,
-                 "额外重量价格": None,
-                 "操作费": None,
-                 "服务费": None,
-                 "最低重量限制": fee['min_weight'] / 1000,
-                 "最高重量限制": fee['max_weight'] / 1000,
-                 "尺寸限制": None,
-                 "体积重量计费规则": fee['remark'],
-                 "运输时间": fee["reference_time"]},
-            )
-            # print(fee)
-        for item in curSiteInfo['venders']:
-            print(item)
-            sheetData.append(
-                (country,
-                 weight,
-                 curSiteInfo['siteName'],
-                 item['venderName'],
-                 item['总价'],
-                 item['首重价格'],
-                 item['额外重量价格'],
-                 item['操作费'],
-                 item['服务费'],
-                 item['最低重量限制'],
-                 item['最高重量限制'],
-                 item['尺寸限制'],
-                 item['体积重量计费规则'],
-                 item['运输时间'],
-                 )
-            )
-        my_feedata['网站'].append(curSiteInfo)
-        print("hippobuy 查询完毕")
+            for fee in fee_datas['data']:
+                curSiteInfo['venders'].append(
+                    # {"venderName": fee['name']},
+                    # {'总价': fee['feeDetail']['total']},
+                    # {'首重价格': fee['first_money']},
+                    # {"额外重量价格": fee['feeDetail']["feeContinue"]},
+                    # {"操作费": fee['feeDetail']["operationFee"]},
+                    # {"服务费": fee['feeDetail']["serviceFee"]},
+                    # {"最低重量限制": fee['min_weight']},
+                    # {"最高重量限制": fee['max_weight'],
+                    # {"尺寸限制": fee['restrictions']["dimensionRestriction"]},
+                    # {"体积重量计费规则": fee['restrictions']["volumeWeightRule"]},
+                    # {"运输时间": fee["reference_time"]}
 
-    except Exception as e:
-        print(e)
-        print("hippobuy 查询错误")
+                    {"venderName": fee['cn_name'],
+                     '总价': fee['count_first'] / 100,
+                     '首重价格': fee['first_money'] / 100,
+                     "额外重量价格": None,
+                     "操作费": None,
+                     "服务费": None,
+                     "最低重量限制": fee['min_weight'] / 1000,
+                     "最高重量限制": fee['max_weight'] / 1000,
+                     "尺寸限制": None,
+                     "体积重量计费规则": fee['remark'],
+                     "运输时间": fee["reference_time"]},
+                )
+                # print(fee)
+            for item in curSiteInfo['venders']:
+                print(item)
+                sheetData.append(
+                    (country,
+                     weight,
+                     curSiteInfo['siteName'],
+                     item['venderName'],
+                     item['总价'],
+                     item['首重价格'],
+                     item['额外重量价格'],
+                     item['操作费'],
+                     item['服务费'],
+                     item['最低重量限制'],
+                     item['最高重量限制'],
+                     item['尺寸限制'],
+                     item['体积重量计费规则'],
+                     item['运输时间'],
+                     )
+                )
+            my_feedata['网站'].append(curSiteInfo)
+            print("hippobuy 查询完毕")
 
-    print(sheetData)
+        except Exception as e:
+            print(e)
+            print("hippobuy 查询错误")
+
+        print(sheetData)
 
     # 创建一个新的工作簿
     # wb = Workbook()
