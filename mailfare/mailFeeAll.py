@@ -491,12 +491,26 @@ E_ZONE = {
 }
 
 country_hippo = {'US': 11987, 'PH': 13410, 'QA': 13411, 'MV': 13412, 'NP': 13413, 'LK': 13414, 'TR': 13415, 'BN': 13416,
-                     'IL': 13417, 'ID': 13418, 'AL': 13419, 'EE': 13420, 'AD': 13421, 'AT': 13422, 'BG': 13423, 'BE': 13424,
-                     'IS': 13425, 'RU': 13426, 'FI': 13427, 'HR': 13428, 'LU': 13429, 'RO': 13430, 'MC': 13431, 'SI': 13432,
-                     'UA': 13433, 'GR': 13434, 'MX': 13435, 'JM': 13436, 'GB': 12072, 'CA': 12311, 'AU': 12303, 'NZ': 13401,
-                     'DK': 13405, 'SE': 13403, 'NO': 13407, 'IE': 13404, 'CH': 13408, 'SA': 13409, 'NL': 13406, 'FR': 12071,
-                     'DE': 12070, 'ES': 12327, 'IT': 13397, 'PT': 13396, 'KY': 13399, 'SK': 13398, 'CL': 13394, 'PL': 12069,
-                     'SG': 12306, 'JP': 12305, 'MY': 13402, 'KR': 12304, 'CN': 13395}
+                 'IL': 13417, 'ID': 13418, 'AL': 13419, 'EE': 13420, 'AD': 13421, 'AT': 13422, 'BG': 13423, 'BE': 13424,
+                 'IS': 13425, 'RU': 13426, 'FI': 13427, 'HR': 13428, 'LU': 13429, 'RO': 13430, 'MC': 13431, 'SI': 13432,
+                 'UA': 13433, 'GR': 13434, 'MX': 13435, 'JM': 13436, 'DZ': 13450, 'EG': 13451, 'ET': 13452, 'AO': 13453,
+                 'BJ': 13454, 'BW': 13455, 'BF': 13456, 'BI': 13457, 'TG': 13458, 'ER': 13459, 'CV': 13460, 'GP': 13461,
+                 'CG': 13462, 'DJ': 13463, 'GN': 13464, 'GW': 13465, 'GH': 13466, 'GA': 13467, 'ZW': 13468, 'CM': 13469,
+                 'KM': 13470, 'CI': 13471, 'KE': 13472, 'LS': 13473, 'LR': 13474, 'LY': 13475, 'RW': 13476, 'MG': 13477,
+                 'MW': 13478, 'ML': 13479, 'YT': 13480, 'MU': 13481, 'MR': 13482, 'MA': 13483, 'MZ': 13484, 'NA': 13485,
+                 'ZA': 13486, 'NE': 13487, 'NG': 13488, 'SL': 13489, 'SN': 13490, 'SC': 13491, 'ST': 13492, 'SZ': 13493,
+                 'SD': 13494, 'SO': 13495, 'TZ': 13496, 'TN': 13497, 'UG': 13498, 'IO': 13499, 'ZM': 13500, 'TD': 13501,
+                 'GI': 13502, 'MS': 13507, 'NI': 13508, 'NF': 13509, 'SV': 13510, 'LC': 13511, 'TC': 13512, 'TT': 13513,
+                 'GT': 13514, 'VI': 13515, 'VG': 13516, 'MQ': 13517, 'CU': 13518, 'HT': 13519, 'HN': 13520, 'CR': 13521,
+                 'GD': 13522, 'GL': 13523, 'DM': 13524, 'BM': 13525, 'PA': 13526, 'PR': 13527, 'BZ': 13528, 'AG': 13529,
+                 'AR': 13530, 'BO': 13531, 'BR': 13532, 'CO': 13533, 'EC': 13534, 'GY': 13535, 'PY': 13536, 'PE': 13537,
+                 'SR': 13538, 'UY': 13539, 'VE': 13540, 'PG': 13541, 'FJ': 13542, 'KI': 13543, 'MH': 13544, 'FM': 13545,
+                 'NR': 13546, 'PW': 13547, 'SB': 13548, 'TO': 13549, 'TV': 13550, 'VU': 13551, 'BA': 13552, 'LV': 13553,
+                 'LI': 13554, 'SM': 13555, 'HU': 13556, 'ME': 13557, 'XK': 13558, 'LT': 13559, 'MT': 13560, 'CY': 13561,
+                 'MD': 13562, 'GB': 12072, 'CA': 12311, 'AU': 12303, 'NZ': 13401, 'DK': 13405, 'SE': 13403, 'NO': 13407,
+                 'IE': 13404, 'CH': 13408, 'SA': 13409, 'NL': 13406, 'FR': 12071, 'DE': 12070, 'ES': 12327, 'IT': 13397,
+                 'PT': 13396, 'KY': 13399, 'SK': 13398, 'CL': 13394, 'PL': 12069, 'SG': 12306, 'JP': 12305, 'MY': 13402,
+                 'KR': 12304, 'CN': 13395}
 
 # glb = dict(globals)
 # print(type(glb))
@@ -515,8 +529,7 @@ if countryList_raw in ("GLOBALS", "ASIA", "OCEANIA", "AFRICA", "AMERICA", "EUROP
 else:
 
     countryList = countryList_raw.split(" ")
-    quote_list= GLOBALS
-
+    quote_list = GLOBALS
 
     print(countryList)
 
@@ -1195,8 +1208,6 @@ def countryFee(country, weight):
 
     # 7 hippobuy
 
-
-
     url_hippo = "https://api-jiyun-v3.haiouoms.com/api/client/express/price-query"
     headers = {
         "Host": "api-jiyun-v3.haiouoms.com",
@@ -1223,7 +1234,8 @@ def countryFee(country, weight):
     }
 
     if country in country_hippo.keys():
-        data = {"warehouse_id": 1250, "country_id": country_hippo[country], "area_id": "", "sub_area_id": "", "weight": weight * 1000,
+        data = {"warehouse_id": 1250, "country_id": country_hippo[country], "area_id": "", "sub_area_id": "",
+                "weight": weight * 1000,
                 "length": "", "width": "", "height": "", "prop_ids": [], "postcode": ""}
 
         try:
