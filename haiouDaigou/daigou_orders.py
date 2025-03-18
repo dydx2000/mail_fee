@@ -1,12 +1,8 @@
 # 导入库
-import hashlib
-import json
-import random
 import time
-import uuid
 
 import requests
-import tls_client
+
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font
 
@@ -47,8 +43,10 @@ session.headers = headers
 # 2查询主订单数据
 # 2.1 获取第一页数据
 
-page = 2
-size = 100
+
+
+page = int(input("请输入要查询的页码："))
+size = int(input("请输入每页查询的条数："))
 
 url_datas = f"https://api-jiyun-v3.haiouoms.com/api/admin/daigou-orders?page={page}&total=0&size={size}&keyword=&platform=&begin_date=&end_date="
 data_orders = {
