@@ -1327,7 +1327,6 @@ def countryFee(country, weight):
     ws['N1'] = '运输时间'
 
     # 写入多行数据
-
     for row in sheetData:
         ws.append(row)
 

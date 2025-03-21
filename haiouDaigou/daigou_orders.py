@@ -65,6 +65,7 @@ res = response.json()
 res_detail = session.get(url="https://api-jiyun-v3.haiouoms.com/api/admin/daigou-orders/89387")
 
 rows = []
+sub_rows = []
 
 for data in res['data']:
     # 遍历本页所有数据
@@ -75,10 +76,17 @@ for data in res['data']:
     # res_detail = response.json()
     #
 
-    if data['packages'] == []:
+    if data['skus'] == []:
         jiyun_packageNO = None
+        sub_orders = []
     else:
-        jiyun_packageNO = data['packages'][0]['express_num']
+        noList = ''
+        sub_orders = []
+        for item in data['skus']:
+            noList += (item['code'] + ",")
+            sub_orders.append(item['code'])
+
+        jiyun_packageNO = noList
 
     if data['purchase_packages'] == []:
         wuliu_order = None
@@ -99,27 +107,17 @@ for data in res['data']:
         pay_method = data['transaction'][0]['pay_name']
         pay_amount = int(data['transaction'][0]['amount']) / 100
 
-    # 订单平台
-    order_platform = []
-    for sku in data['skus']:
-        order_platform.append(sku['platform'])
-    txt = ''
-    for item in set(order_platform):
-        txt += (item + " ")
-
-    order_platform = txt
-
     row = {"order_sn": data['order_sn'],
            "status_name": data['status_name'],
            "country_name": data['address']['country_name'],
            "created_time": data['created_at'],
            "whare_house": data['warehouse']['warehouse_name'],
-           "jiyun_packageNO": jiyun_packageNO,  # 先以单条子运单测试
+           "jiyun_packageNO": jiyun_packageNO,
            "platform_orderNo": data['platform_order_sn'],
-           "wuliu_order": wuliu_order,  # data['purchase_packages'][0]['express_num'],   # 可能为空
+           "wuliu_order": wuliu_order,  # data['purchase_packages'][0]['express_num'],   # 就是一个
            "order_user": data['user']['name'],
            "purchaser": purchaser,  # data['purchaser']['username'], # 可能为空
-           "order_platform": order_platform,  # 0321, 优化了有多个平台采购的情景
+           "order_platform": data['skus'][0]['platform'],
            "address": "",  # 其他接口,
            "pay_status": data["pay_status"],
            "pay_order": pay_order,  # data['transaction'][0]['serial_no'],  # transction [] 可能空数据
@@ -129,6 +127,41 @@ for data in res['data']:
            "delivery_fee": data['freight_fee'],
            "total_payment": data['amount']
            }
+    for sku in data['skus']:
+        if sku['name_cn'] is not None:
+            sub_name = sku['name_cn']
+        else:
+            sub_name = sku['name']
+
+        sku_spec = ""
+        try:
+            if sku['sku_info']['specs_cn'] is not None:
+                # sku_spec = str(sku['sku_info']['specs_cn'])
+                for info in sku['sku_info']['specs_cn']:
+                    sku_spec += (info['label'] + ": " + info['value'] + ", ")
+            else:
+                for info in sku['sku_info']['specs']:
+                    sku_spec += (info['label'] + ": " + info['value'] + ", ")
+        except:
+            print("keyError")
+            sku_spec = "keyError"
+
+        sub_row = (sku['code'],
+                   data['order_sn'],
+                   sku['price'],
+                   sku['quantity'],
+                   float(sku['price']) * int(sku['quantity']),
+                   data['status_name'],
+                   sub_name,
+                   sku['platform_url'],
+                   sku['sku_info']['sku_img'],
+                   # sku['sku_info']['specs'],
+                   sku_spec,
+                   sku['remark']
+                   )
+        print(sub_row)
+        sub_rows.append(sub_row)
+
     print(row)
     row_data = (row["order_sn"], row["status_name"], row["country_name"], row["created_time"],
                 row["whare_house"], row["jiyun_packageNO"], row["platform_orderNo"], row["wuliu_order"],
@@ -150,7 +183,7 @@ ws = wb.active
 # 设置工作表标题
 # ws.title = f"{country}-运费表"
 
-# 写入数据到单元格
+# 写入数据到单元格 主表
 # 写入数据到单元格
 ws['A1'] = '主订单号'
 ws['B1'] = '订单状态'
@@ -173,7 +206,6 @@ ws['R1'] = '运费'
 ws['S1'] = '订单总额'
 
 # 写入多行数据
-
 for row in rows:
     ws.append(row)
 
@@ -203,6 +235,27 @@ for i in range(1, max_rows + 1):
 
 # for j in range(1,max_columns+1):
 #     ws.column_dimensions[j].width = 15
+
+
+# 切换活动工作表，写入子订单数据
+ws_sub = wb.create_sheet("Sheet2")
+wb.active = ws_sub
+
+# 写入数据到单元格
+ws_sub['A1'] = '子订单id'
+ws_sub['B1'] = '主订单号'
+ws_sub['C1'] = '单价'
+ws_sub['D1'] = '数量'
+ws_sub['E1'] = '总货值'
+ws_sub['F1'] = '子单状态'
+ws_sub['G1'] = '商品名称'
+ws_sub['H1'] = '商品链接'
+ws_sub['I1'] = '主图链接'
+ws_sub['J1'] = '子单备注'
+
+# 写入多行数据到子单表
+for sub_row in sub_rows:
+    ws_sub.append(sub_row)
 
 # 保存工作簿
 # 将时间戳转换为本地时间元组
