@@ -44,7 +44,6 @@ session.headers = headers
 # 2.1 获取第一页数据
 
 
-
 page = int(input("请输入要查询的页码："))
 size = int(input("请输入每页查询的条数："))
 
@@ -66,6 +65,7 @@ res = response.json()
 res_detail = session.get(url="https://api-jiyun-v3.haiouoms.com/api/admin/daigou-orders/89387")
 
 rows = []
+sub_rows = []
 
 for data in res['data']:
     # 遍历本页所有数据
@@ -78,11 +78,13 @@ for data in res['data']:
 
     if data['skus'] == []:
         jiyun_packageNO = None
+        sub_orders = []
     else:
-        noList=''
+        noList = ''
+        sub_orders = []
         for item in data['skus']:
-            noList+=(item['code']+",")
-
+            noList += (item['code'] + ",")
+            sub_orders.append(item['code'])
 
         jiyun_packageNO = noList
 
@@ -103,7 +105,7 @@ for data in res['data']:
     else:
         pay_order = data['transaction'][0]['serial_no']
         pay_method = data['transaction'][0]['pay_name']
-        pay_amount = int(data['transaction'][0]['amount'])/100
+        pay_amount = int(data['transaction'][0]['amount']) / 100
 
     row = {"order_sn": data['order_sn'],
            "status_name": data['status_name'],
@@ -119,17 +121,45 @@ for data in res['data']:
            "address": "",  # 其他接口,
            "pay_status": data["pay_status"],
            "pay_order": pay_order,  # data['transaction'][0]['serial_no'],  # transction [] 可能空数据
-           "pay_time" : data['paid_at'],
+           "pay_time": data['paid_at'],
            "pay_method": pay_method,  # data['transaction'][0]['pay_name'],
            "pay_amount": pay_amount,  # data['transaction'][0]['amount'],  # 还要计算?
            "delivery_fee": data['freight_fee'],
            "total_payment": data['amount']
            }
+    for sku in data['skus']:
+        if sku['name_cn'] is not None:
+            sub_name = sku['name_cn']
+        else:
+            sub_name = sku['name']
+
+        if sku['sku_info']['specs_cn'] is not None:
+            sku_spec = str(sku['sku_info']['specs_cn'])
+        else:
+            sku_spec = str(sku['sku_info']['specs'])
+
+        sub_row = (sku['code'],
+                   data['order_sn'],
+                   sku['price'],
+                   sku['quantity'],
+                   float(sku['price'])*int(sku['quantity']),
+                   data['status_name'],
+                   sub_name,
+                   sku['platform_url'],
+                   sku['sku_info']['sku_img'],
+                   # sku['sku_info']['specs'],
+                   sku_spec,
+                   sku['remark']
+                   )
+        print(sub_row)
+        sub_rows.append(sub_row)
+
+
     print(row)
     row_data = (row["order_sn"], row["status_name"], row["country_name"], row["created_time"],
                 row["whare_house"], row["jiyun_packageNO"], row["platform_orderNo"], row["wuliu_order"],
                 row["order_user"], row["purchaser"], row["order_platform"], row["address"], row["pay_status"],
-                row["pay_order"],row['pay_time'],  row["pay_method"], row["pay_amount"], row["delivery_fee"],
+                row["pay_order"], row['pay_time'], row["pay_method"], row["pay_amount"], row["delivery_fee"],
                 row["total_payment"]
                 )
     rows.append(row_data)
@@ -146,7 +176,7 @@ ws = wb.active
 # 设置工作表标题
 # ws.title = f"{country}-运费表"
 
-# 写入数据到单元格
+# 写入数据到单元格 主表
 # 写入数据到单元格
 ws['A1'] = '主订单号'
 ws['B1'] = '订单状态'
@@ -169,7 +199,6 @@ ws['R1'] = '运费'
 ws['S1'] = '订单总额'
 
 # 写入多行数据
-
 for row in rows:
     ws.append(row)
 
@@ -200,11 +229,37 @@ for i in range(1, max_rows + 1):
 # for j in range(1,max_columns+1):
 #     ws.column_dimensions[j].width = 15
 
+
+# 切换活动工作表，写入子订单数据
+ws_sub = wb.create_sheet("Sheet2")
+wb.active= ws_sub
+
+# 写入数据到单元格
+ws_sub['A1'] = '子订单id'
+ws_sub['B1'] = '主订单号'
+ws_sub['C1'] = '单价'
+ws_sub['D1'] = '数量'
+ws_sub['E1'] = '总货值'
+ws_sub['F1'] = '子单状态'
+ws_sub['G1'] = '商品名称'
+ws_sub['H1'] = '商品链接'
+ws_sub['I1'] = '主图链接'
+ws_sub['J1'] = '子单备注'
+
+# 写入多行数据到子单表
+for sub_row in sub_rows:
+    ws_sub.append(sub_row)
+
 # 保存工作簿
 # 将时间戳转换为本地时间元组
-timestamp=time.time()
+timestamp = time.time()
 local_time = time.localtime(timestamp)
 
 # # 获取日期时间
 formatted_time = time.strftime("%Y-%m-%d_%H%M%S", local_time)
 wb.save(f'haiou_daigou_orders_{formatted_time}.xlsx')
+
+
+
+
+
