@@ -251,7 +251,8 @@ ws_sub['F1'] = '子单状态'
 ws_sub['G1'] = '商品名称'
 ws_sub['H1'] = '商品链接'
 ws_sub['I1'] = '主图链接'
-ws_sub['J1'] = '子单备注'
+ws_sub['J1'] = '商品规格'
+ws_sub['K1'] = '子单备注'
 
 # 写入多行数据到子单表
 for sub_row in sub_rows:
