@@ -133,16 +133,24 @@ for data in res['data']:
         else:
             sub_name = sku['name']
 
-        if sku['sku_info']['specs_cn'] is not None:
-            sku_spec = str(sku['sku_info']['specs_cn'])
-        else:
-            sku_spec = str(sku['sku_info']['specs'])
+        sku_spec = ""
+        try:
+            if sku['sku_info']['specs_cn'] is not None:
+                # sku_spec = str(sku['sku_info']['specs_cn'])
+                for info in sku['sku_info']['specs_cn']:
+                    sku_spec += (info['label'] + ": " + info['value'] + ", ")
+            else:
+                for info in sku['sku_info']['specs']:
+                    sku_spec += (info['label'] + ": " + info['value'] + ", ")
+        except:
+            print("keyError")
+            sku_spec = "keyError"
 
         sub_row = (sku['code'],
                    data['order_sn'],
                    sku['price'],
                    sku['quantity'],
-                   float(sku['price'])*int(sku['quantity']),
+                   float(sku['price']) * int(sku['quantity']),
                    data['status_name'],
                    sub_name,
                    sku['platform_url'],
@@ -153,7 +161,6 @@ for data in res['data']:
                    )
         print(sub_row)
         sub_rows.append(sub_row)
-
 
     print(row)
     row_data = (row["order_sn"], row["status_name"], row["country_name"], row["created_time"],
@@ -232,7 +239,7 @@ for i in range(1, max_rows + 1):
 
 # 切换活动工作表，写入子订单数据
 ws_sub = wb.create_sheet("Sheet2")
-wb.active= ws_sub
+wb.active = ws_sub
 
 # 写入数据到单元格
 ws_sub['A1'] = '子订单id'
@@ -258,8 +265,3 @@ local_time = time.localtime(timestamp)
 # # 获取日期时间
 formatted_time = time.strftime("%Y-%m-%d_%H%M%S", local_time)
 wb.save(f'haiou_daigou_orders_{formatted_time}.xlsx')
-
-
-
-
-
