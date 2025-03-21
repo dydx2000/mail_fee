@@ -44,7 +44,6 @@ session.headers = headers
 # 2.1 获取第一页数据
 
 
-
 page = int(input("请输入要查询的页码："))
 size = int(input("请输入每页查询的条数："))
 
@@ -98,7 +97,17 @@ for data in res['data']:
     else:
         pay_order = data['transaction'][0]['serial_no']
         pay_method = data['transaction'][0]['pay_name']
-        pay_amount = data['transaction'][0]['amount']
+        pay_amount = int(data['transaction'][0]['amount']) / 100
+
+    # 订单平台
+    order_platform = []
+    for sku in data['skus']:
+        order_platform.append(sku['platform'])
+    txt = ''
+    for item in set(order_platform):
+        txt += (item + " ")
+
+    order_platform = txt
 
     row = {"order_sn": data['order_sn'],
            "status_name": data['status_name'],
@@ -110,11 +119,11 @@ for data in res['data']:
            "wuliu_order": wuliu_order,  # data['purchase_packages'][0]['express_num'],   # 可能为空
            "order_user": data['user']['name'],
            "purchaser": purchaser,  # data['purchaser']['username'], # 可能为空
-           "order_platform": data['skus'][0]['platform'],
+           "order_platform": order_platform,  # 0321, 优化了有多个平台采购的情景
            "address": "",  # 其他接口,
            "pay_status": data["pay_status"],
            "pay_order": pay_order,  # data['transaction'][0]['serial_no'],  # transction [] 可能空数据
-           "pay_time" : data['paid_at'],
+           "pay_time": data['paid_at'],
            "pay_method": pay_method,  # data['transaction'][0]['pay_name'],
            "pay_amount": pay_amount,  # data['transaction'][0]['amount'],  # 还要计算?
            "delivery_fee": data['freight_fee'],
@@ -124,7 +133,7 @@ for data in res['data']:
     row_data = (row["order_sn"], row["status_name"], row["country_name"], row["created_time"],
                 row["whare_house"], row["jiyun_packageNO"], row["platform_orderNo"], row["wuliu_order"],
                 row["order_user"], row["purchaser"], row["order_platform"], row["address"], row["pay_status"],
-                row["pay_order"],row['pay_time'],  row["pay_method"], row["pay_amount"], row["delivery_fee"],
+                row["pay_order"], row['pay_time'], row["pay_method"], row["pay_amount"], row["delivery_fee"],
                 row["total_payment"]
                 )
     rows.append(row_data)
@@ -197,7 +206,7 @@ for i in range(1, max_rows + 1):
 
 # 保存工作簿
 # 将时间戳转换为本地时间元组
-timestamp=time.time()
+timestamp = time.time()
 local_time = time.localtime(timestamp)
 
 # # 获取日期时间
