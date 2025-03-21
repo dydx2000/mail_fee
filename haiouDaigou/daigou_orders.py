@@ -76,10 +76,15 @@ for data in res['data']:
     # res_detail = response.json()
     #
 
-    if data['packages'] == []:
+    if data['skus'] == []:
         jiyun_packageNO = None
     else:
-        jiyun_packageNO = data['packages'][0]['express_num']
+        noList=''
+        for item in data['skus']:
+            noList+=(item['code']+",")
+
+
+        jiyun_packageNO = noList
 
     if data['purchase_packages'] == []:
         wuliu_order = None
@@ -98,16 +103,16 @@ for data in res['data']:
     else:
         pay_order = data['transaction'][0]['serial_no']
         pay_method = data['transaction'][0]['pay_name']
-        pay_amount = data['transaction'][0]['amount']
+        pay_amount = int(data['transaction'][0]['amount'])/100
 
     row = {"order_sn": data['order_sn'],
            "status_name": data['status_name'],
            "country_name": data['address']['country_name'],
            "created_time": data['created_at'],
            "whare_house": data['warehouse']['warehouse_name'],
-           "jiyun_packageNO": jiyun_packageNO,  # 先以单条子运单测试
+           "jiyun_packageNO": jiyun_packageNO,
            "platform_orderNo": data['platform_order_sn'],
-           "wuliu_order": wuliu_order,  # data['purchase_packages'][0]['express_num'],   # 可能为空
+           "wuliu_order": wuliu_order,  # data['purchase_packages'][0]['express_num'],   # 就是一个
            "order_user": data['user']['name'],
            "purchaser": purchaser,  # data['purchaser']['username'], # 可能为空
            "order_platform": data['skus'][0]['platform'],
