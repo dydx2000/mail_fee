@@ -135,15 +135,25 @@ for data in res['data']:
 
         sku_spec = ""
         try:
-            if sku['sku_info']['specs_cn'] is not None:
+            # if sku['sku_info']['specs_cn'] is not None:
+            if 'specs_cn' in sku['sku_info'].keys():
                 # sku_spec = str(sku['sku_info']['specs_cn'])
                 for info in sku['sku_info']['specs_cn']:
-                    sku_spec += (info['label'] + ": " + info['value'] + ", ")
-            else:
+                    if not (info['label'] is None or info['value'] is None):
+                        sku_spec += (info['label'] + ": " + info['value'] + ", ")
+                    else:
+                        sku_spec = "null"
+            elif 'specs' in sku['sku_info'].keys():
                 for info in sku['sku_info']['specs']:
-                    sku_spec += (info['label'] + ": " + info['value'] + ", ")
-        except:
+                    if not (info['label'] is None or info['value'] is None):
+                        sku_spec += (info['label'] + ": " + info['value'] + ", ")
+                    else:
+                        sku_spec = "null"
+            else:
+                sku_spec = "not exist"
+        except Exception as e:
             print("keyError")
+            print(e)
             sku_spec = "keyError"
 
         sub_row = (sku['code'],
