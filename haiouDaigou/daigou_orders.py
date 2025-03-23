@@ -138,11 +138,14 @@ for data in res['data']:
             # if sku['sku_info']['specs_cn'] is not None:
             if 'specs_cn' in sku['sku_info'].keys():
                 # sku_spec = str(sku['sku_info']['specs_cn'])
-                for info in sku['sku_info']['specs_cn']:
-                    if not (info['label'] is None or info['value'] is None):
-                        sku_spec += (info['label'] + ": " + info['value'] + ", ")
-                    else:
-                        sku_spec = "null"
+                if sku['sku_info']['specs_cn'] == []:
+                    sku_spec = 'empty'
+                else:
+                    for info in sku['sku_info']['specs_cn']:
+                        if not (info['label'] is None or info['value'] is None):
+                            sku_spec += (info['label'] + ": " + info['value'] + ", ")
+                        else:
+                            sku_spec = "null"
             elif 'specs' in sku['sku_info'].keys():
                 for info in sku['sku_info']['specs']:
                     if not (info['label'] is None or info['value'] is None):
