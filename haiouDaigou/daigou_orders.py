@@ -168,7 +168,7 @@ for data in res['data']:
             print(e)
             sku_spec = "keyError"
 
-        #todo 主订单交易状态和子订单状态的逻辑关系
+        # 主订单交易状态和子订单状态的逻辑关系
         if data['status_name'] in ['采购中', '待付款', '待入库','已付款','已取消','已入库']:
             sub_state_name = data['status_name']
 
