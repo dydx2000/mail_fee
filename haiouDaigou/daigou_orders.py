@@ -107,11 +107,19 @@ for data in res['data']:
         pay_method = data['transaction'][0]['pay_name']
         pay_amount = int(data['transaction'][0]['amount']) / 100
 
+
+    print(data['order_sn'])
+    if data['warehouse'] is not None:
+        whare_house=data['warehouse']['warehouse_name']
+    else:
+        whare_house = ''
+
+
     row = {"order_sn": data['order_sn'],
            "status_name": data['status_name'],
            "country_name": data['address']['country_name'],
            "created_time": data['created_at'],
-           "whare_house": data['warehouse']['warehouse_name'],
+           "whare_house": whare_house,
            "jiyun_packageNO": jiyun_packageNO,
            "platform_orderNo": data['platform_order_sn'],
            "wuliu_order": wuliu_order,  # data['purchase_packages'][0]['express_num'],   # 就是一个
@@ -136,7 +144,14 @@ for data in res['data']:
         sku_spec = ""
         try:
             # if sku['sku_info']['specs_cn'] is not None:
-            if 'specs_cn' in sku['sku_info'].keys():
+            if 'specs' in sku['sku_info'].keys():
+                for info in sku['sku_info']['specs']:
+                    if not (info['label'] is None or info['value'] is None):
+                        sku_spec += (info['label'] + ": " + info['value'] + ", ")
+                    else:
+                        sku_spec = "null"
+
+            elif 'specs_cn' in sku['sku_info'].keys():
                 # sku_spec = str(sku['sku_info']['specs_cn'])
                 if sku['sku_info']['specs_cn'] == []:
                     sku_spec = 'empty'
@@ -146,12 +161,6 @@ for data in res['data']:
                             sku_spec += (info['label'] + ": " + info['value'] + ", ")
                         else:
                             sku_spec = "null"
-            elif 'specs' in sku['sku_info'].keys():
-                for info in sku['sku_info']['specs']:
-                    if not (info['label'] is None or info['value'] is None):
-                        sku_spec += (info['label'] + ": " + info['value'] + ", ")
-                    else:
-                        sku_spec = "null"
             else:
                 sku_spec = "not exist"
         except Exception as e:
@@ -159,18 +168,35 @@ for data in res['data']:
             print(e)
             sku_spec = "keyError"
 
+        #todo 主订单交易状态和子订单状态的逻辑关系
+        if data['status_name'] in ['采购中', '待付款', '待入库','已付款','已取消','已入库']:
+            sub_state_name = data['status_name']
+
+        elif data['status_name'] == '已采购':
+            if data['sub_status']==1:
+                sub_state_name ='分开发货'
+            else:
+                sub_state_name= '已采购'
+
+        else:
+            sub_state_name = data['sub_status_name']
+
         sub_row = (sku['code'],
                    data['order_sn'],
                    sku['price'],
                    sku['quantity'],
                    float(sku['price']) * int(sku['quantity']),
-                   data['status_name'],
+                   sub_state_name,
                    sub_name,
                    sku['platform_url'],
                    sku['sku_info']['sku_img'],
                    # sku['sku_info']['specs'],
                    sku_spec,
-                   sku['remark']
+                   sku['remark'],
+                   data['status_name'],
+                   data['status'],
+                   sub_state_name,
+                   data['sub_status']
                    )
         print(sub_row)
         sub_rows.append(sub_row)
@@ -266,6 +292,13 @@ ws_sub['H1'] = '商品链接'
 ws_sub['I1'] = '主图链接'
 ws_sub['J1'] = '商品规格'
 ws_sub['K1'] = '子单备注'
+
+ws_sub['L1'] = '主单状态'
+ws_sub['M1'] = '主单状态码'
+ws_sub['N1'] = '子单状态'
+ws_sub['O1'] = '子单状态码'
+
+
 
 # 写入多行数据到子单表
 for sub_row in sub_rows:
