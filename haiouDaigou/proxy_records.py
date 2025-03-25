@@ -36,16 +36,29 @@ headers = {
 
 session.headers = headers
 invite_rows = []
+agentIdMap = {}
+deal_rows = []
 
-
+# 获取代理数据
+def getAllAgentData():
+    page = 1,
+    size = 1000
+    data_agent = {
+        "keyword": None,
+        "page": page,
+        "size": size
+    }
+    url = f"https://api-jiyun-v3.haiouoms.com/api/admin/agents?keyword=&page={page}&size={size}"
+    response = session.get(data=data_agent, url=url)
+    resp = response.json()
+    for item in resp['data']:
+        agentIdMap[item['user_id']]=item['id']
 def getInvieRecords():
     data_invite = {
         "page": 1,
         "size": 10,
     }
-
     # 获取邀请记录
-
     for proxy_id in proxy_ids:
         url_invite = f"https://api-jiyun-v3.haiouoms.com/api/admin/users/{proxy_id}/invitations?page=1&size=10"
         response = session.get(url=url_invite, data=data_invite)
@@ -65,7 +78,6 @@ def getInvieRecords():
                     "lastLogin_time": item['last_login_at'],
                     "if_invited": is_agent_invite
                 }
-
                 row_data = (
                     row['proxy_id'], row['client_id'], row['client_nickName'], row['register_time'],
                     row['lastLogin_time'],
@@ -73,11 +85,6 @@ def getInvieRecords():
                 invite_rows.append(row_data)
 
     print(invite_rows)
-
-
-deal_rows = []
-
-
 def getDealRecords():
     # 处理成交记录
     # 获取成交记录
@@ -87,8 +94,9 @@ def getDealRecords():
     }
 
     for proxy_id in proxy_ids:
-        url_deal = f"https://api-jiyun-v3.haiouoms.com/api/admin/agents/{proxy_id}/deal-orders?page=1&size=10"
-                    # "https://api-jiyun-v3.haiouoms.com/api/admin/agents/27654/deal-orders?page=1&size=10"
+        agentId = agentIdMap[proxy_id]
+        url_deal = f"https://api-jiyun-v3.haiouoms.com/api/admin/agents/{agentId}/deal-orders?page=1&size=10"
+        # "https://api-jiyun-v3.haiouoms.com/api/admin/agents/27654/deal-orders?page=1&size=10"
         response = session.get(url=url_deal, data=data_deal)
         res = response.json()
         if len(res['data']) > 0:
@@ -98,20 +106,21 @@ def getDealRecords():
                     "proxy_id": proxy_id,
                     "orderUser_id": item['user_id'],
                     "name": item['user_name'],
-                    "order_number":item['order_number'],
+                    "order_number": item['order_number'],
                     "order_amount": item['order_amount'],
                     "commission_prop": item['proportion'],
-                    "commission"  :item['commission_amount'],
-                    "deal_time":item['created_at'],
-                    "status":item['settled']
+                    "commission": item['commission_amount'],
+                    "deal_time": item['created_at'],
+                    "status": item['settled']
                 }
-                row_data =( row['proxy_id'],row['orderUser_id'],row['name'],
-                            row['order_number'], row['order_amount'],row['commission_prop'],
-                            row['commission'],row['deal_time'],row['status'])
+                row_data = (row['proxy_id'], row['orderUser_id'], row['name'],
+                            row['order_number'], row['order_amount'], row['commission_prop'],
+                            row['commission'], row['deal_time'], row['status'])
                 deal_rows.append(row_data)
 
+getAllAgentData()
 
-# getInvieRecords()
+getInvieRecords()
 
 getDealRecords()
 
