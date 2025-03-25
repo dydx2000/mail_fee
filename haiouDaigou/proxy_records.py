@@ -111,11 +111,13 @@ def getDealRecords():
                     "commission_prop": item['proportion'],
                     "commission": item['commission_amount'],
                     "deal_time": item['created_at'],
-                    "status": item['settled']
+                    "status": item['settled'],
+                    "level": item['level']
+
                 }
                 row_data = (row['proxy_id'], row['orderUser_id'], row['name'],
                             row['order_number'], row['order_amount'], row['commission_prop'],
-                            row['commission'], row['deal_time'], row['status'])
+                            row['commission'],row['level'], row['deal_time'], row['status'])
                 deal_rows.append(row_data)
 
 getAllAgentData()
